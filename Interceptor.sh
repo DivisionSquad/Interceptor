@@ -34,15 +34,20 @@ echo -e "\t\tBienvenue dans le programme d'ARP Poisoning !!"
 echo -e "================================================================================\n"
 
 echo -e "\n================================================================================"
-read -p '			Votre interface réseau : ' interface
+#read -p '			Votre interface réseau : ' interface
 
-until [[ "$interface" != "wlan*" || "$interface" != "eth*" ]]
+checkInt=""
+interface=""
+
+until [[ "$interface" = "$checkInt" && "$interface" != "" ]]
 do
-	if [[ "$interface" != "wlan*" || "$interface" != "eth*" ]]
+	if [[ "$interface" != "$checkInt" || "$interface" = "" ]]
 	then
 		echo -e "Saisissez une interface existante\n"
-		read -p '			Votre interface réseau : ' interface
 	fi
+	
+	read -p '			Votre interface réseau : ' interface
+	checkInt=$(/sbin/ifconfig $interface | cut -d" " -f1 | grep $interface)
 done 
 
 ip=$(ifconfig $interface | grep "inet ad" | cut -f2 -d: | awk '{print $1}')
