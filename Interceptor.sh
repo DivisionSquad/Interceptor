@@ -38,13 +38,13 @@ interface=""
 
 until [[ "$interface" = "$checkInt" && "$interface" != "" ]]
 do
-	if [[ "$interface" != "$checkInt" || "$interface" = "" ]]
-	then
-		echo -e "Saisissez une interface existante\n"
-	fi
-	
 	read -p '			Votre interface réseau : ' interface
 	checkInt=$(/sbin/ifconfig $interface | cut -d" " -f1 | grep $interface)
+
+	if [[ "$interface" != "$checkInt" || "$interface" = "" ]]
+	then
+		echo -e "\n\t\t    Saisissez une interface existante\n"
+	fi
 done 
 
 ip=$(ifconfig $interface | grep "inet ad" | cut -f2 -d: | awk '{print $1}')
